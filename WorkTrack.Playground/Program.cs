@@ -1,113 +1,25 @@
-﻿Console.WriteLine("=== Value Type ===");
+﻿using WorkTrack.Domain.Entities;
+using WorkTrack.Domain.Enums;
 
-int a = 10;
-int b = a;
-b = 20;
+User user = new User(
+    "Armita",
+    "armita@example.com"
+);
 
-Console.WriteLine($"a = {a}");
-Console.WriteLine($"b = {b}");
+WorkItem item = new WorkItem(
+    "Build login page",
+    "Implement the first version of login",
+    Priority.High
+);
 
-Console.WriteLine();
-Console.WriteLine("=== Reference Type ===");
+Console.WriteLine($"Initial status: {item.Status}");
+Console.WriteLine($"Assigned: {item.AssignedTo != null}");
 
-Person p1 = new Person { Name = "Sara" };
-Person p2 = p1;
+item.AssignTo(user);
 
-p2.Name = "Mary";
+Console.WriteLine($"After assign: {item.Status}");
+Console.WriteLine($"Assigned to: {item.AssignedTo?.Name}");
 
-Console.WriteLine($"p1.Name = {p1.Name}");
-Console.WriteLine($"p2.Name = {p2.Name}");
+item.Close();
 
-Console.WriteLine();
-Console.WriteLine("=== Reference Reassignment ===");
-
-p2 = new Person { Name = "John" };
-
-Console.WriteLine($"p1.Name = {p1.Name}");
-Console.WriteLine($"p2.Name = {p2.Name}");
-
-Console.WriteLine();
-Console.WriteLine("=== String Immutability ===");
-
-string s1 = "Sara";
-string s2 = s1;
-
-s2 = s2.ToUpper();
-
-Console.WriteLine($"s1 = {s1}");
-Console.WriteLine($"s2 = {s2}");
-
-Console.WriteLine();
-Console.WriteLine("=== Equality ===");
-
-Person e1 = new Person { Name = "Sara" };
-Person e2 = new Person { Name = "Sara" };
-Person e3 = e1;
-
-Console.WriteLine($"e1 == e2: {e1 == e2}");
-Console.WriteLine($"e1.Equals(e2): {e1.Equals(e2)}");
-Console.WriteLine($"ReferenceEquals(e1, e2): {ReferenceEquals(e1, e2)}");
-
-Console.WriteLine($"e1 == e3: {e1 == e3}");
-Console.WriteLine($"ReferenceEquals(e1, e3): {ReferenceEquals(e1, e3)}");
-
-Console.WriteLine();
-Console.WriteLine("=== Parameter Passing ===");
-
-Person person = new Person { Name = "Sara" };
-
-ChangeName(person);
-Console.WriteLine($"After ChangeName: {person.Name}");
-
-ReplacePerson(person);
-Console.WriteLine($"After ReplacePerson: {person.Name}");
-
-ReplacePersonByRef(ref person);
-Console.WriteLine($"After ReplacePersonByRef: {person.Name}");
-
-Console.WriteLine();
-Console.WriteLine("=== ref / out / in ===");
-
-int number = 10;
-ChangeNumber(ref number);
-Console.WriteLine($"ref number: {number}");
-
-CreateNumber(out int createdNumber);
-Console.WriteLine($"out number: {createdNumber}");
-
-ReadNumber(in number);
-
-static void ChangeName(Person p)
-{
-    p.Name = "Mary";
-}
-
-static void ReplacePerson(Person p)
-{
-    p = new Person { Name = "John" };
-}
-
-static void ReplacePersonByRef(ref Person p)
-{
-    p = new Person { Name = "John" };
-}
-
-static void ChangeNumber(ref int value)
-{
-    value += 5;
-}
-
-static void CreateNumber(out int value)
-{
-    value = 50;
-}
-
-static void ReadNumber(in int value)
-{
-    Console.WriteLine($"in number: {value}");
-}
-
-class Person
-{
-    public string Name { get; set; } = "";
-}
+Console.WriteLine($"After close: {item.Status}");
