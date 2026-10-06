@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="WorkTrack.Api/WorkTrack.Api.csproj" />
   <Project Path="WorkTrack.Domain/WorkTrack.Domain.csproj" />
   <Project Path="WorkTrack.Playground/WorkTrack.Playground.csproj" />
 </Solution>
