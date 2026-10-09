@@ -3,6 +3,7 @@ using WorkTrack.Api.Dtos;
 using WorkTrack.Domain.Contracts;
 using WorkTrack.Domain.Dtos;
 using WorkTrack.Domain.Entities;
+using WorkTrack.Domain.Enums;
 
 namespace WorkTrack.Api.Controllers;
 
@@ -18,11 +19,22 @@ public class WorkItemsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll(
+        [FromQuery] Priority? priority
+    )
     {
+
         var items = await _store.GetAllAsync();
 
-        var response = items
+        IEnumerable<WorkItem> filteredItems = items;
+
+        if (priority.HasValue)
+        {
+            filteredItems = filteredItems
+                .Where(x => x.Priority == priority.Value);
+        }
+
+        var response = filteredItems
             .Select(ToResponse)
             .ToList();
 
@@ -45,6 +57,12 @@ public class WorkItemsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(CreateWorkItemRequest request)
     {
+        if(string.IsNullOrWhiteSpace(request.Title))
+        {
+            ModelState.AddModelError(nameof(request.Title),
+             "Title is required.");
+            return ValidationProblem(ModelState);
+        }
         var item = new WorkItem(
             request.Title,
             request.Description,
@@ -70,4 +88,17 @@ public class WorkItemsController : ControllerBase
             item.CreatedAt,
             item.ClosedAt);
     }
+
+    [HttpGet("high-priority")]
+    public async Task<IActionResult> GetHighPriority()
+{
+    var items = await _store.GetAllAsync();
+
+    var response = items
+        .Where(x => x.Priority == Priority.High)
+        .Select(ToResponse)
+        .ToList();
+
+    return Ok(response);
+}
 }
