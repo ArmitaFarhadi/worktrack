@@ -18,23 +18,30 @@ public class WorkItem : Entity, IClosable
     public DateTime? ClosedAt { get; private set; }
 
     public WorkItem(
-        string title,
-        string description,
-        Priority priority)
+    string title,
+    string description,
+    Priority priority)
+{
+    if (string.IsNullOrWhiteSpace(title))
     {
-        if (string.IsNullOrWhiteSpace(title))
-        {
-            throw new ArgumentException(
-                "Title is required.",
-                nameof(title));
-        }
-
-        Title = title;
-        Description = description;
-        Priority = priority;
-        Status = WorkItemStatus.Open;
+        throw new ArgumentException(
+            "Title is required.",
+            nameof(title));
     }
 
+    if (!Enum.IsDefined(priority))
+    {
+        throw new ArgumentOutOfRangeException(
+            nameof(priority),
+            priority,
+            "Priority must be a defined value.");
+    }
+
+    Title = title;
+    Description = description;
+    Priority = priority;
+    Status = WorkItemStatus.Open;
+}
     public void AssignTo(User user)
     {
         if (user is null)
@@ -54,6 +61,14 @@ public class WorkItem : Entity, IClosable
 
     public void ChangePriority(Priority priority)
     {
+        if (!Enum.IsDefined(priority))
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(priority),
+                priority,
+                "Priority must be a defined value.");
+        }
+
         if (Status == WorkItemStatus.Closed)
         {
             throw new InvalidOperationException(

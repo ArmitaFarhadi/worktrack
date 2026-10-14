@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using WorkTrack.Domain.Contracts;
 using WorkTrack.Domain.Entities;
 using WorkTrack.Infrastructure.Data;
+using WorkTrack.Domain.Enums;
 
 namespace WorkTrack.Infrastructure.Stores;
 
@@ -29,11 +30,37 @@ public class EfWorkItemStore : IWorkItemStore
             .FirstOrDefaultAsync(x => x.Id == id);
     }
 
-    public async Task<IReadOnlyCollection<WorkItem>> GetAllAsync()
+    public async Task<IReadOnlyCollection<WorkItem>> GetAllAsync(
+    Priority? priority = null)
+{
+    IQueryable<WorkItem> query = _context.WorkItems
+        .AsNoTracking()
+        .Include(x => x.AssignedTo);
+
+    if (priority.HasValue)
+    {
+        query = query.Where(
+            x => x.Priority == priority.Value);
+    }
+
+    return await query
+        .OrderByDescending(x => x.CreatedAt)
+        .ToListAsync();
+}
+    public async Task<WorkItem?> GetForUpdateAsync(Guid id)
     {
         return await _context.WorkItems
-            .AsNoTracking()
-            .Include(x => x.AssignedTo)
-            .ToListAsync();
+            .FirstOrDefaultAsync(x => x.Id == id);
     }
+
+    public async Task SaveChangesAsync()
+    {
+        await _context.SaveChangesAsync();
+    }
+
+    public void Remove(WorkItem item)
+    {
+        _context.WorkItems.Remove(item);
+    }
+
 }
