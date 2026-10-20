@@ -8,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+builder.Services.AddProblemDetails();
 
 // Read the connection string from configuration
 var connectionString = builder.Configuration
@@ -24,6 +25,8 @@ builder.Services.AddScoped<
     EfWorkItemStore>();
 
 var app = builder.Build();
+app.UseExceptionHandler();
+app.UseStatusCodePages();
 
 if (app.Environment.IsDevelopment())
 {

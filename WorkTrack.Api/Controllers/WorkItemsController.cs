@@ -12,10 +12,12 @@ namespace WorkTrack.Api.Controllers;
 public class WorkItemsController : ControllerBase
 {
     private readonly IWorkItemStore _store;
+    private readonly ILogger<WorkItemsController> _logger;
 
-    public WorkItemsController(IWorkItemStore store)
+    public WorkItemsController(IWorkItemStore store, ILogger<WorkItemsController> logger)
     {
         _store = store;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -46,9 +48,9 @@ public class WorkItemsController : ControllerBase
         return Ok(ToResponse(item));
     }
 
-    [HttpPost]
+
    [HttpPost]
-public async Task<IActionResult> Create(
+    public async Task<IActionResult> Create(
     CreateWorkItemRequest request)
 {
     if (string.IsNullOrWhiteSpace(request.Title))
@@ -76,6 +78,10 @@ public async Task<IActionResult> Create(
         request.Priority);
 
     await _store.AddAsync(item);
+    _logger.LogInformation(
+    "Work item {WorkItemId} created with priority {Priority}",
+    item.Id,
+    item.Priority);
 
     return CreatedAtAction(
         nameof(GetById),
