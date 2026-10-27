@@ -5,4 +5,5 @@ namespace WorkTrack.Domain.Dtos;
 public record CreateWorkItemRequest(
     string Title,
     string Description,
-    Priority Priority);
+    Priority Priority,
+    DateTime DueDate);

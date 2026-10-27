@@ -10,4 +10,5 @@ public record WorkItemResponse(
     Priority Priority,
     Guid? AssignedToId,
     DateTime CreatedAt,
-    DateTime? ClosedAt);
+    DateTime? ClosedAt,
+    DateTime DueDate);

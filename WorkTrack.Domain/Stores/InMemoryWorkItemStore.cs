@@ -1,6 +1,7 @@
 using WorkTrack.Domain.Contracts;
 using WorkTrack.Domain.Entities;
 using WorkTrack.Domain.Enums;
+using WorkTrack.Domain.Dtos;
 
 namespace WorkTrack.Domain.Stores;
 
@@ -23,8 +24,12 @@ public class InMemoryWorkItemStore : IWorkItemStore
         return Task.FromResult(item);
     }
 
-    public Task<IReadOnlyCollection<WorkItem>> GetAllAsync(
-    Priority? priority = null)
+   public Task<PagedResult<WorkItem>> GetAllAsync(
+    Priority? priority = null,
+    WorkItemStatus? status = null,
+    string? sort = null,
+    int? page = null,
+    int? pageSize = null)
 {
     IEnumerable<WorkItem> query = _items;
 
@@ -34,13 +39,45 @@ public class InMemoryWorkItemStore : IWorkItemStore
             x => x.Priority == priority.Value);
     }
 
-    IReadOnlyCollection<WorkItem> result = query
-        .OrderByDescending(x => x.CreatedAt)
-        .ToList();
+    if (status.HasValue)
+    {
+        query = query.Where(
+            x => x.Status == status.Value);
+    }
 
-    return Task.FromResult(result);
+    var totalCount = query.Count();
+
+    if (string.Equals(
+        sort,
+        "dueDate",
+        StringComparison.OrdinalIgnoreCase))
+    {
+        query = query
+            .OrderBy(x => x.DueDate)
+            .ThenBy(x => x.Id);
+    }
+    else
+    {
+        query = query
+            .OrderByDescending(x => x.CreatedAt)
+            .ThenBy(x => x.Id);
+    }
+
+    if (page.HasValue && pageSize.HasValue)
+    {
+        query = query
+            .Skip((page.Value - 1) * pageSize.Value)
+            .Take(pageSize.Value);
+    }
+
+    IReadOnlyCollection<WorkItem> items =
+        query.ToList();
+
+    return Task.FromResult(
+        new PagedResult<WorkItem>(
+            items,
+            totalCount));
 }
-
     public Task<WorkItem?> GetForUpdateAsync(Guid id)
 {
     return GetByIdAsync(id);
