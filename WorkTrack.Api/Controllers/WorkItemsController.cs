@@ -21,6 +21,12 @@ public class WorkItemsController : ControllerBase
     }
 
     [HttpGet]
+    [ProducesResponseType(
+    typeof(PagedWorkItemsResponse),
+    StatusCodes.Status200OK)]
+    [ProducesResponseType(
+    typeof(ValidationProblemDetails),
+    StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetAll(
         [FromQuery] Priority? priority,
         [FromQuery] WorkItemStatus? status,
@@ -64,16 +70,19 @@ public class WorkItemsController : ControllerBase
 
         var response = items.Items.Select(ToResponse).ToList();
 
-        return Ok(new
-        {
-            page,
-            pageSize,
-            totalCount = items.TotalCount,
-            items = response
-        });
+       return Ok(new PagedWorkItemsResponse(
+             page,
+             pageSize,
+             items.TotalCount,
+             response));
     }
 
     [HttpGet("{id:guid}")]
+    [ProducesResponseType(
+    typeof(WorkItemResponse),
+    StatusCodes.Status200OK)]
+    [ProducesResponseType(
+    StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetById(Guid id)
     {
         var item = await _store.GetByIdAsync(id);
@@ -88,6 +97,12 @@ public class WorkItemsController : ControllerBase
 
 
     [HttpPost]
+    [ProducesResponseType(
+    typeof(WorkItemResponse),
+    StatusCodes.Status201Created)]
+    [ProducesResponseType(
+    typeof(ValidationProblemDetails),
+    StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create(
      CreateWorkItemRequest request)
     {
@@ -150,6 +165,9 @@ public class WorkItemsController : ControllerBase
     }
 
     [HttpGet("high-priority")]
+    [ProducesResponseType(
+    typeof(List<WorkItemResponse>),
+    StatusCodes.Status200OK)]
     public async Task<IActionResult> GetHighPriority()
     {
         var items = await _store.GetAllAsync(Priority.High);
@@ -162,6 +180,14 @@ public class WorkItemsController : ControllerBase
     }
 
     [HttpPut("{id:guid}/priority")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(
+        typeof(ValidationProblemDetails),
+        StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(
+        typeof(string),
+        StatusCodes.Status409Conflict)]
     public async Task<IActionResult> UpdatePriority(
         Guid id,
         UpdateWorkItemPriorityRequest request)
@@ -211,6 +237,8 @@ public class WorkItemsController : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(Guid id)
     {
         var item = await _store.GetForUpdateAsync(id);
@@ -227,6 +255,9 @@ public class WorkItemsController : ControllerBase
     }
 
     [HttpPost("{id:guid}/close")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Close(Guid id)
     {
         var item = await _store.GetForUpdateAsync(id);

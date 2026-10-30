@@ -17,11 +17,16 @@ public class WorkItem : Entity, IClosable
 
     public DateTime? ClosedAt { get; private set; }
     public DateTime DueDate { get; private set; }
+    private WorkItem()
+    {
+        Title = null!;
+        Description = null!;
+    }
     public WorkItem(
     string title,
     string description,
     Priority priority,
-    DateTime dueDate )
+    DateTime initialDueDate )
 {
     if (string.IsNullOrWhiteSpace(title))
     {
@@ -38,17 +43,17 @@ public class WorkItem : Entity, IClosable
             "Priority must be a defined value.");
     }
 
-    if (dueDate < DateTime.UtcNow)
+    if (initialDueDate < DateTime.UtcNow)
     {
         throw new ArgumentException(
             "Due date cannot be in the past.",
-            nameof(dueDate));
+            nameof(initialDueDate));
     }
     Title = title;
     Description = description;
     Priority = priority;
     Status = WorkItemStatus.Open;
-    DueDate = dueDate;
+    DueDate = initialDueDate;
 }
     public void AssignTo(User user)
     {
