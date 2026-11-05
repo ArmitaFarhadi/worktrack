@@ -7,6 +7,8 @@ using WorkTrack.Infrastructure.Stores;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+builder.Services.AddSingleton<TimeProvider>(
+    TimeProvider.System);
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
 
@@ -38,3 +40,5 @@ app.UseHttpsRedirection();
 app.MapControllers();
 
 app.Run();
+
+public partial class Program { }

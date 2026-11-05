@@ -13,11 +13,15 @@ public class WorkItemsController : ControllerBase
 {
     private readonly IWorkItemStore _store;
     private readonly ILogger<WorkItemsController> _logger;
+    private readonly TimeProvider _timeProvider;
 
-    public WorkItemsController(IWorkItemStore store, ILogger<WorkItemsController> logger)
+    public WorkItemsController(IWorkItemStore store,
+     ILogger<WorkItemsController> logger,
+     TimeProvider timeProvider)
     {
         _store = store;
         _logger = logger;
+        _timeProvider = timeProvider;
     }
 
     [HttpGet]
@@ -278,4 +282,22 @@ public class WorkItemsController : ControllerBase
 
         return NoContent();
     }
+
+    [HttpGet("overdue")]
+    [ProducesResponseType(
+    typeof(List<WorkItemResponse>),
+    StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetOverdue()
+    {
+        var items = await _store.GetAllAsync();
+        var now = _timeProvider.GetUtcNow().UtcDateTime;
+        var response = items.Items
+            .Where(item => item.DueDate < now
+            && item.Status != WorkItemStatus.Closed)
+            .Select(ToResponse)
+            .ToList();
+
+        return Ok(response);
+    }
+
 }

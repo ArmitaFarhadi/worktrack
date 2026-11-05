@@ -26,8 +26,13 @@ public class WorkItem : Entity, IClosable
     string title,
     string description,
     Priority priority,
-    DateTime initialDueDate )
+    DateTime initialDueDate,
+    TimeProvider? timeProvider = null )
 {
+
+    var clock = timeProvider ?? TimeProvider.System;
+    var nowUtc = clock.GetUtcNow().UtcDateTime;
+
     if (string.IsNullOrWhiteSpace(title))
     {
         throw new ArgumentException(
@@ -43,7 +48,7 @@ public class WorkItem : Entity, IClosable
             "Priority must be a defined value.");
     }
 
-    if (initialDueDate < DateTime.UtcNow)
+    if (initialDueDate < nowUtc)
     {
         throw new ArgumentException(
             "Due date cannot be in the past.",
