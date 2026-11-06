@@ -63,6 +63,7 @@ The actual port may differ.
 | PUT | `/api/WorkItems/{id}/priority` | Update priority | 204, 400, 404, 409 |
 | POST | `/api/WorkItems/{id}/close` | Close a work item | 204, 404, 409 |
 | DELETE | `/api/WorkItems/{id}` | Delete a work item | 204, 404 |
+| GET | `/api/WorkItems/overdue` | Returns overdue work items, excluding closed items | 200 |
 
 These are the documented application responses, not an exhaustive list of possible infrastructure failures.
 
@@ -147,6 +148,13 @@ Attempting to close an already closed item returns `409 Conflict`.
 A successful deletion returns `204 No Content`.
 
 Requesting or attempting to delete a nonexistent item returns `404 Not Found`.
+
+## Getting overdue work items
+
+**Endpoint:** `GET /api/WorkItems/overdue`
+
+Returns overdue work items, excluding closed items.
+A successful request returns `200 OK` with a JSON array.
 
 ## Error Responses
 
